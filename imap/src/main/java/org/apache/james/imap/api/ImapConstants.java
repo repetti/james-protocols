@@ -203,6 +203,8 @@ public interface ImapConstants {
 
     public static final String COPY_COMMAND_NAME = "COPY";
 
+    public static final String MOVE_COMMAND_NAME = "MOVE";
+
     public static final String CLOSE_COMMAND_NAME = "CLOSE";
 
     public static final String CHECK_COMMAND_NAME = "CHECK";

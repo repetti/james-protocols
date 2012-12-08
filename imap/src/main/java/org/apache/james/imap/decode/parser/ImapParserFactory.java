@@ -85,6 +85,7 @@ public class ImapParserFactory implements ImapCommandParserFactory {
         _imapCommands.put(ImapConstants.CLOSE_COMMAND_NAME, CloseCommandParser.class);
         _imapCommands.put(ImapConstants.EXPUNGE_COMMAND_NAME, ExpungeCommandParser.class);
         _imapCommands.put(ImapConstants.COPY_COMMAND_NAME, CopyCommandParser.class);
+        _imapCommands.put(ImapConstants.MOVE_COMMAND_NAME, MoveCommandParser.class);
         _imapCommands.put(ImapConstants.SEARCH_COMMAND_NAME, SearchCommandParser.class);
         _imapCommands.put(ImapConstants.FETCH_COMMAND_NAME, FetchCommandParser.class);
         _imapCommands.put(ImapConstants.STORE_COMMAND_NAME, StoreCommandParser.class);

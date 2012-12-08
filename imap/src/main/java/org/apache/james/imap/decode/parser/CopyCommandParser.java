@@ -33,9 +33,12 @@ import org.apache.james.protocols.imap.DecodingException;
 public class CopyCommandParser extends AbstractUidCommandParser {
 
     public CopyCommandParser() {
-        super(ImapCommand.selectedStateCommand(ImapConstants.COPY_COMMAND_NAME));
+        this(ImapCommand.selectedStateCommand(ImapConstants.COPY_COMMAND_NAME));
     }
 
+    protected CopyCommandParser(ImapCommand command) {
+    	super(command);
+    }
     /**
      * @see
      * org.apache.james.imap.decode.parser.AbstractUidCommandParser#decode(org.apache.james.imap.api.ImapCommand,
@@ -46,8 +49,13 @@ public class CopyCommandParser extends AbstractUidCommandParser {
         IdRange[] idSet = request.parseIdRange(session);
         String mailboxName = request.mailbox();
         request.eol();
-        final ImapMessage result = new CopyRequest(command, idSet, mailboxName, useUids, tag);
+        final ImapMessage result = createRequest(command, tag, useUids, idSet, mailboxName);
         return result;
     }
+
+	protected CopyRequest createRequest(ImapCommand command, String tag,
+			boolean useUids, IdRange[] idSet, String mailboxName) {
+		return new CopyRequest(command, idSet, mailboxName, useUids, tag);
+}
 
 }

@@ -346,6 +346,10 @@ public class MailboxEventAnalyserTest {
             throw new UnsupportedOperationException("Not implemented");
 
         }
+        public List<MessageRange> moveMessages(MessageRange set, MailboxPath from, MailboxPath to, MailboxSession session) throws MailboxException {
+            throw new UnsupportedOperationException("Not implemented");
+
+        }
     };
     private final class MyMailboxSession implements MailboxSession {
         private long sessionId;

@@ -44,6 +44,10 @@ import org.apache.james.mailbox.model.MessageRange;
 public class CopyProcessor extends AbstractMailboxProcessor<CopyRequest> {
 
     public CopyProcessor(final ImapProcessor next, final MailboxManager mailboxManager, final StatusResponseFactory factory) {
+        this(CopyRequest.class, next, mailboxManager, factory);
+    }
+
+    protected CopyProcessor(final Class<? extends CopyRequest> acceptableClass, final ImapProcessor next, final MailboxManager mailboxManager, final StatusResponseFactory factory) {
         super(CopyRequest.class, next, mailboxManager, factory);
     }
 
@@ -74,8 +78,10 @@ public class CopyProcessor extends AbstractMailboxProcessor<CopyRequest> {
                 for (int i = 0; i < idSet.length; i++) {
                     MessageRange messageSet = messageRange(currentMailbox, idSet[i], useUids);
                     if (messageSet != null) {
-                        List<MessageRange> copiedUids = mailboxManager.copyMessages(messageSet, currentMailbox.getPath(), targetMailbox, mailboxSession);
-                        for (MessageRange mr : copiedUids) {
+                        List<MessageRange> processedUids = process(
+								targetMailbox, currentMailbox, mailboxSession,
+								mailboxManager, messageSet);
+                        for (MessageRange mr : processedUids) {
                             // Set recent flag on copied message as this SHOULD be
                             // done.
                             // See RFC 3501 6.4.7. COPY Command
@@ -108,4 +114,13 @@ public class CopyProcessor extends AbstractMailboxProcessor<CopyRequest> {
             no(command, tag, responder, HumanReadableText.GENERIC_FAILURE_DURING_PROCESSING);
         }
     }
+
+	protected List<MessageRange> process(final MailboxPath targetMailbox,
+			final SelectedMailbox currentMailbox,
+			final MailboxSession mailboxSession,
+			final MailboxManager mailboxManager, MessageRange messageSet)
+			throws MailboxException {
+		List<MessageRange> processedUids = mailboxManager.copyMessages(messageSet, currentMailbox.getPath(), targetMailbox, mailboxSession);
+		return processedUids;
+}
 }
