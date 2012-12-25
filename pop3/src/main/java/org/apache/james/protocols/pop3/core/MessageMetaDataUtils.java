@@ -57,7 +57,7 @@ public class MessageMetaDataUtils {
         }
 
         for (int i = 0; i < uid.length(); i++) {
-            if ((uid.charAt(i) >= 0x21 && uid.charAt(i) < 0x7E) == false) {
+            if ((uid.charAt(i) >= 0x21 && uid.charAt(i) <= 0x7E) == false) {
                 return false;
             }
         }
