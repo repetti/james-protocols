@@ -17,7 +17,8 @@
     specific language governing permissions and limitations
     under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -29,8 +30,9 @@
 
     <groupId>org.apache.james.protocols</groupId>
     <artifactId>protocols-smtp</artifactId>
+    <packaging>bundle</packaging>
 
-    <name>Apache James Protocols SMTP</name>
+    <name>Apache James :: Protocols :: SMTP</name>
 
     <dependencies>
         <dependency>
@@ -75,49 +77,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <!-- This configuration is used by all goals -->
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                        <manifest>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>bundle-manifest</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Export-Package>org.apache.james.protocols.smtp.*</Export-Package>
-                        <Embed-Dependency>*;scope=runtime</Embed-Dependency>
-                        <!-- exclude commons codec as we pull it in via shade plugin -->
-                        <Import-Package>!org.apache.commons.codec.*,*</Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>
                     <execution>
@@ -134,22 +93,23 @@
                             <filters>
                                 <filter>
                                     <artifact>commons-codec:commons-codec</artifact>
-                                        <excludes>
-                                            <exclude>org/apache/commons/codec/*</exclude>
-                                        </excludes>
-                                        <includes>
-                                            <include>org/apache/commons/codec/binary/*</include>
-                                        </includes>
-                                    </filter>
-                                </filters>
-                                <relocations>
-                                    <relocation>
-                                        <pattern>org.apache.commons.codec.binary</pattern>
-                                        <shadedPattern>org.apache.james.protocols.smtp.util</shadedPattern>
-                                    </relocation>
-                                </relocations>
+                                    <excludes>
+                                        <exclude>org/apache/commons/codec/*</exclude>
+                                    </excludes>
+                                    <includes>
+                                        <include>org/apache/commons/codec/binary/*</include>
+                                    </includes>
+                                </filter>
+                            </filters>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.apache.commons.codec.binary</pattern>
+                                    <shadedPattern>org.apache.james.protocols.smtp.util</shadedPattern>
+                                </relocation>
+                            </relocations>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer"/>
                             </transformers>
                         </configuration>
                     </execution>
