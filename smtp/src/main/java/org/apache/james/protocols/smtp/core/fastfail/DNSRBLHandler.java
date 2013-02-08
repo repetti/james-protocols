@@ -16,9 +16,6 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-
-
-
 package org.apache.james.protocols.smtp.core.fastfail;
 
 import java.net.InetAddress;
@@ -38,9 +35,8 @@ import org.apache.james.protocols.smtp.hook.RcptHook;
 /**
   * Connect handler for DNSRBL processing
   */
-public class DNSRBLHandler implements  RcptHook{
+public class DNSRBLHandler implements RcptHook {
 
-    
     /**
      * The lists of rbl servers to be checked to limit spam
      */
@@ -54,7 +50,6 @@ public class DNSRBLHandler implements  RcptHook{
     public static final String RBL_BLOCKLISTED_MAIL_ATTRIBUTE_NAME = "org.apache.james.smtpserver.rbl.blocklisted";
     
     public static final String RBL_DETAIL_MAIL_ATTRIBUTE_NAME = "org.apache.james.smtpserver.rbl.detail";
-   
     
     /**
      * Set the whitelist array
@@ -105,7 +100,6 @@ public class DNSRBLHandler implements  RcptHook{
      * the sender will only be permitted to send e-mail to postmaster (RFC 2821) or
      * abuse (RFC 2142), unless authenticated.
      */
-
     public void checkDNSRBL(SMTPSession session, String ipAddress) {
         
         /*
@@ -178,6 +172,29 @@ public class DNSRBLHandler implements  RcptHook{
     }
     
     /**
+     * @see org.apache.james.protocols.smtp.hook.RcptHook#doRcpt(org.apache.james.protocols.smtp.SMTPSession, org.apache.mailet.MailAddress, org.apache.mailet.MailAddress)
+     */
+    public HookResult doRcpt(SMTPSession session, MailAddress sender, MailAddress rcpt) {
+        checkDNSRBL(session, session.getRemoteAddress().getAddress().getHostAddress());
+    
+        if (!session.isRelayingAllowed()) {
+            String blocklisted = (String) session.getAttachment(RBL_BLOCKLISTED_MAIL_ATTRIBUTE_NAME, State.Connection);
+    
+            if (blocklisted != null) { // was found in the RBL
+                if (blocklistedDetail == null) {
+                    return new HookResult(HookReturnCode.DENY,DSNStatus.getStatus(DSNStatus.PERMANENT,
+                            DSNStatus.SECURITY_AUTH)  + " Rejected: unauthenticated e-mail from " + session.getRemoteAddress().getAddress() 
+                            + " is restricted.  Contact the postmaster for details.");
+                } else {
+                    return new HookResult(HookReturnCode.DENY,DSNStatus.getStatus(DSNStatus.PERMANENT,DSNStatus.SECURITY_AUTH) + " " + blocklistedDetail);
+                }
+               
+            }
+        }
+        return HookResult.declined();
+    }
+
+    /**
      * Check if the given ipaddress is resolvable. 
      * 
      * This implementation use {@link InetAddress#getByName(String)}. Sub-classes may override this with a more performant solution
@@ -204,28 +221,5 @@ public class DNSRBLHandler implements  RcptHook{
      */
     protected Collection<String> resolveTXTRecords(String ip) {
         return Collections.<String>emptyList();
-    }
-
-    /**
-     * @see org.apache.james.protocols.smtp.hook.RcptHook#doRcpt(org.apache.james.protocols.smtp.SMTPSession, org.apache.mailet.MailAddress, org.apache.mailet.MailAddress)
-     */
-    public HookResult doRcpt(SMTPSession session, MailAddress sender, MailAddress rcpt) {
-        checkDNSRBL(session, session.getRemoteAddress().getAddress().getHostAddress());
-
-        if (!session.isRelayingAllowed()) {
-            String blocklisted = (String) session.getAttachment(RBL_BLOCKLISTED_MAIL_ATTRIBUTE_NAME, State.Connection);
-    
-            if (blocklisted != null) { // was found in the RBL
-                if (blocklistedDetail == null) {
-                    return new HookResult(HookReturnCode.DENY,DSNStatus.getStatus(DSNStatus.PERMANENT,
-                            DSNStatus.SECURITY_AUTH)  + " Rejected: unauthenticated e-mail from " + session.getRemoteAddress().getAddress() 
-                            + " is restricted.  Contact the postmaster for details.");
-                } else {
-                    return new HookResult(HookReturnCode.DENY,DSNStatus.getStatus(DSNStatus.PERMANENT,DSNStatus.SECURITY_AUTH) + " " + blocklistedDetail);
-                }
-               
-            }
-        }
-        return HookResult.declined();
     }
 }
