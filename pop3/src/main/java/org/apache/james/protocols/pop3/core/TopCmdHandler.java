@@ -21,7 +21,6 @@ package org.apache.james.protocols.pop3.core;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.SequenceInputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,11 +92,9 @@ public class TopCmdHandler extends RetrCmdHandler implements CapaCapability {
                 String uid = data.getUid();
                 if (deletedUidList.contains(uid) == false) {
 
-                    InputStream body = new CountingBodyInputStream(new ExtraDotInputStream(new CRLFTerminatedInputStream(session.getUserMailbox().getMessageBody(uid))), lines);
-                    InputStream headers = session.getUserMailbox().getMessageHeaders(uid);
-                    if (body != null && headers != null) {
-                        return new POP3StreamResponse(POP3Response.OK_RESPONSE, "Message follows", new SequenceInputStream(headers, body));
-
+                    InputStream message = new CountingBodyInputStream(new ExtraDotInputStream(new CRLFTerminatedInputStream(session.getUserMailbox().getMessage(uid))), lines);
+                    if (message != null) {
+                        return new POP3StreamResponse(POP3Response.OK_RESPONSE, "Message follows", message);
                     } else {
                         StringBuilder exceptionBuffer = new StringBuilder(64).append("Message (").append(num).append(") does not exist.");
                         return new POP3Response(POP3Response.ERR_RESPONSE, exceptionBuffer.toString());
@@ -143,8 +140,8 @@ public class TopCmdHandler extends RetrCmdHandler implements CapaCapability {
     }
 
     /**
-     * This {@link InputStream} implementation can be used to limit the body
-     * lines which will be read from the wrapped {@link InputStream}
+     * This {@link InputStream} implementation can be used to return all message headers 
+     * and limit the body lines which will be read from the wrapped {@link InputStream}.
      */   
     private final class CountingBodyInputStream extends InputStream {
 
@@ -152,6 +149,8 @@ public class TopCmdHandler extends RetrCmdHandler implements CapaCapability {
         private int limit = -1;
         private int lastChar;
         private InputStream in;
+        private boolean isBody = false; // starting from header
+        private boolean isEmptyLine = false;
 
         /**
          * 
@@ -171,9 +170,23 @@ public class TopCmdHandler extends RetrCmdHandler implements CapaCapability {
                 if (count <= limit) {
                     int a = in.read();
 
-                    if (lastChar == '\r' && a == '\n') {
-                        count++;
+                    // check for empty line
+                    if (!isBody && isEmptyLine && lastChar == '\r' && a == '\n') {
+                    	// reached body
+                    	isBody = true;
                     }
+
+                    if (lastChar == '\r' && a == '\n') {
+                    	// reset empty line flag
+                    	isEmptyLine = true;
+
+                    	if (isBody) {
+                    		count++;
+                    	}
+                    } else if (lastChar == '\n' && a != '\r') {
+                    	isEmptyLine = false;
+                    }
+
                     lastChar = a;
 
                     return a;
