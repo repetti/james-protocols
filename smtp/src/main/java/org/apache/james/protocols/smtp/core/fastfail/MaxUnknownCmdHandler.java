@@ -36,7 +36,7 @@ public class MaxUnknownCmdHandler implements UnknownHook{
     public final static int DEFAULT_MAX_UNKOWN = 5;
     
     private final static String UNKOWN_COMMAND_COUNT = "UNKNOWN_COMMAND_COUNT";
-    private int maxUnknown;
+    private int maxUnknown = DEFAULT_MAX_UNKOWN;;
     
     public void setMaxUnknownCmdCount(int maxUnknown) {
         this.maxUnknown = maxUnknown;
@@ -55,7 +55,7 @@ public class MaxUnknownCmdHandler implements UnknownHook{
         }
         session.setAttachment(UNKOWN_COMMAND_COUNT, count, State.Transaction);
         if (count > maxUnknown) {
-            return new HookResult(HookReturnCode.DENY | HookReturnCode.DISCONNECT, "521", "Closing connection as to many unknown commands received");
+            return new HookResult(HookReturnCode.DENY | HookReturnCode.DISCONNECT, "521", "Closing connection as too many unknown commands received");
 
         } else {
             
