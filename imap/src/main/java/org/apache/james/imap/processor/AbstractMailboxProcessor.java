@@ -66,7 +66,6 @@ import org.apache.james.mailbox.model.SearchQuery.NumericRange;
 abstract public class AbstractMailboxProcessor<M extends ImapRequest> extends AbstractChainedProcessor<M> {
 
     private final MailboxManager mailboxManager;
-
     private final StatusResponseFactory factory;
 
     public AbstractMailboxProcessor(final Class<M> acceptableClass, final ImapProcessor next, final MailboxManager mailboxManager, final StatusResponseFactory factory) {
@@ -75,9 +74,6 @@ abstract public class AbstractMailboxProcessor<M extends ImapRequest> extends Ab
         this.factory = factory;
     }
 
-    /*
-     * 
-     */
     protected final void doProcess(final M acceptableMessage, final Responder responder, final ImapSession session) {
         final M request = acceptableMessage;
         process(request, responder, session);
@@ -191,20 +187,22 @@ abstract public class AbstractMailboxProcessor<M extends ImapRequest> extends Ab
         responder.respond(new VanishedResponse(uidRange, false));
     }
     
-
     private void addFlagsResponses(final ImapSession session, final SelectedMailbox selected, final ImapProcessor.Responder responder, boolean useUid) {
        
-        
         try {
-            final MessageManager mailbox = getMailbox(session, selected);
+  
+            // To be lazily initialized only if needed, which is in minority of cases.
+            MessageManager messageManager = null;
+
             final MailboxSession mailboxSession = ImapSessionUtils.getMailboxSession(session);
 
-            // Check ifwe need to send a FLAGS and PERMANENTFLAGS response before the FETCH response
+            // Check if we need to send a FLAGS and PERMANENTFLAGS response before the FETCH response
             // This is the case if some new flag/keyword was used
             // See IMAP-303
             if (selected.hasNewApplicableFlags()) {
+                messageManager = getMailbox(session, selected);
                 flags(responder, selected);
-                permanentFlags(responder, mailbox.getMetaData(false, mailboxSession,  MessageManager.MetaData.FetchGroup.NO_COUNT), selected);
+                permanentFlags(responder, messageManager.getMetaData(false, mailboxSession, MessageManager.MetaData.FetchGroup.NO_COUNT), selected);
                 selected.resetNewApplicableFlags();
             }
             
@@ -212,15 +210,19 @@ abstract public class AbstractMailboxProcessor<M extends ImapRequest> extends Ab
             if (!flagUpdateUids.isEmpty()) {
                 Iterator<MessageRange> ranges = MessageRange.toRanges(flagUpdateUids).iterator();
                 while(ranges.hasNext()) {
-                    addFlagsResponses(session, selected, responder, useUid, ranges.next(), mailbox, mailboxSession);
+                 if (messageManager == null)
+                 messageManager = getMailbox(session, selected);
+                    addFlagsResponses(session, selected, responder, useUid, ranges.next(), messageManager, mailboxSession);
                 }
 
             }
+            
         } catch (MailboxException e) {
             handleResponseException(responder, e, HumanReadableText.FAILURE_TO_LOAD_FLAGS, session);
         }
-    }
 
+    }
+    
     protected void addFlagsResponses(final ImapSession session, final SelectedMailbox selected, final ImapProcessor.Responder responder, boolean useUid, MessageRange messageSet, MessageManager mailbox, MailboxSession mailboxSession) throws MailboxException {
 
         final MessageResultIterator it = mailbox.getMessages(messageSet, FetchGroupImpl.MINIMAL,  mailboxSession);
