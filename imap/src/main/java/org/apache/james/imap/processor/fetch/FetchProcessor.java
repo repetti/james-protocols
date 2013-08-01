@@ -160,6 +160,12 @@ public class FetchProcessor extends AbstractMailboxProcessor<FetchRequest> {
             MessageResultIterator messages = mailbox.getMessages(ranges.get(i), resultToFetch, mailboxSession);
             while (messages.hasNext()) {
                 final MessageResult result = messages.next();
+                
+                //skip unchanged messages - this should be filtered at the mailbox level to take advantage of indexes
+                if(fetch.isModSeq() && result.getModSeq() <= fetch.getChangedSince()) {
+                	continue;
+                }
+                
                 try {
                     final FetchResponse response = builder.build(fetch, result, mailbox, session, useUids);
                     responder.respond(response);
