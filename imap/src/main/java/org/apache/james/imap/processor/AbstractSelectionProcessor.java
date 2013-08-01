@@ -76,7 +76,7 @@ abstract class AbstractSelectionProcessor<M extends AbstractMailboxSelectionRequ
      * org.apache.james.imap.api.ImapCommand,
      * org.apache.james.imap.api.process.ImapProcessor.Responder)
      */
-    protected void doProcess(AbstractMailboxSelectionRequest request, ImapSession session, String tag, ImapCommand command, Responder responder) {
+    protected void doProcess(M request, ImapSession session, String tag, ImapCommand command, Responder responder) {
         final String mailboxName = request.getMailboxName();
         try {
             final MailboxPath fullMailboxPath = buildFullPath(session, mailboxName);

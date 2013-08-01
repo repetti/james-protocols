@@ -29,4 +29,5 @@ public class ExamineProcessor extends AbstractSelectionProcessor<ExamineRequest>
     public ExamineProcessor(final ImapProcessor next, final MailboxManager mailboxManager, final StatusResponseFactory statusResponseFactory) {
         super(ExamineRequest.class, next, mailboxManager, statusResponseFactory, true);
     }
+
 }
