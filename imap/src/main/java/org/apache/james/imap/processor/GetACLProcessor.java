@@ -38,6 +38,7 @@ import org.apache.james.mailbox.MessageManager.MetaData;
 import org.apache.james.mailbox.MessageManager.MetaData.FetchGroup;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
+import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.model.SimpleMailboxACL.Rfc4314Rights;
 import org.slf4j.Logger;
 
@@ -61,8 +62,9 @@ public class GetACLProcessor extends AbstractMailboxProcessor<GetACLRequest> imp
         final String mailboxName = message.getMailboxName();
         try {
 
-            MessageManager messageManager = mailboxManager.getMailbox(buildFullPath(session, mailboxName), mailboxSession);
-
+            MailboxPath mailboxPath = buildFullPath(session, mailboxName);
+            // Check that mailbox exists
+            MessageManager messageManager = mailboxManager.getMailbox(mailboxPath, mailboxSession);
             /*
              * RFC 4314 section 6.
              * An implementation MUST make sure the ACL commands themselves do
@@ -73,11 +75,11 @@ public class GetACLProcessor extends AbstractMailboxProcessor<GetACLRequest> imp
              * would be used if the mailbox did not exist, thus revealing no
              * existence information, much less the mailbox’s ACL.
              */
-            if (!messageManager.hasRight(Rfc4314Rights.l_Lookup_RIGHT, mailboxSession)) {
+            if (!mailboxManager.hasRight(mailboxPath, Rfc4314Rights.l_Lookup_RIGHT, mailboxSession)) {
                 no(command, tag, responder, HumanReadableText.MAILBOX_NOT_FOUND);
             }
             /* RFC 4314 section 4. */
-            else if (!messageManager.hasRight(Rfc4314Rights.a_Administer_RIGHT, mailboxSession)) {
+            else if (!mailboxManager.hasRight(mailboxPath, Rfc4314Rights.a_Administer_RIGHT, mailboxSession)) {
                 Object[] params = new Object[] {
                         Rfc4314Rights.a_Administer_RIGHT.toString(),
                         command.getName(),

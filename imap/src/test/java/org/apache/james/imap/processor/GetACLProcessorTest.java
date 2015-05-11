@@ -70,6 +70,7 @@ public class GetACLProcessorTest {
     UnpooledStatusResponseFactory statusResponseFactory;
     GetACLProcessor subject;
     User user1Stub;
+    MailboxPath path;
 
     private Expectations prepareRightsExpectations() throws MailboxException {
         return new Expectations() {
@@ -99,6 +100,7 @@ public class GetACLProcessorTest {
 
     @Before
     public void setUp() throws Exception {
+        path = new MailboxPath("#private", USER_1, MAILBOX_NAME);
         statusResponseFactory = new UnpooledStatusResponseFactory();
         mailboxManagerStub = mockery.mock(MailboxManager.class);
         subject = new GetACLProcessor(mockery.mock(ImapProcessor.class), mailboxManagerStub, statusResponseFactory);
@@ -116,7 +118,7 @@ public class GetACLProcessorTest {
     public void testNoListRight() throws Exception {
 
         Expectations expectations = prepareRightsExpectations();
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(false));
 
         expectations.allowing(mailboxManagerStub).getMailbox(expectations.with(Expectations.any(MailboxPath.class)), expectations.with(Expectations.any(MailboxSession.class)));
@@ -139,10 +141,10 @@ public class GetACLProcessorTest {
     public void testNoAdminRight() throws Exception {
 
         Expectations expectations = prepareRightsExpectations();
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(true));
 
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(false));
 
         expectations.allowing(mailboxManagerStub).getMailbox(expectations.with(Expectations.any(MailboxPath.class)), expectations.with(Expectations.any(MailboxSession.class)));
@@ -190,10 +192,10 @@ public class GetACLProcessorTest {
         expectations.allowing(mailboxManagerStub).getMailbox(expectations.with(Expectations.any(MailboxPath.class)), expectations.with(Expectations.any(MailboxSession.class)));
         expectations.will(Expectations.returnValue(messageManagerStub));
         
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(true));
         
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(true));
         
 

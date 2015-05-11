@@ -76,6 +76,7 @@ public class ListRightsProcessorTest {
     User user1Stub;
     MailboxACLEntryKey user1Key;
     MailboxACLRights[] listRights;
+    MailboxPath path;
 
     private Expectations prepareRightsExpectations() throws MailboxException {
         return new Expectations() {
@@ -105,6 +106,7 @@ public class ListRightsProcessorTest {
 
     @Before
     public void setUp() throws Exception {
+        path = new MailboxPath("#private", USER_1, MAILBOX_NAME);
         statusResponseFactory = new UnpooledStatusResponseFactory();
         mailboxManagerStub = mockery.mock(MailboxManager.class);
         subject = new ListRightsProcessor(mockery.mock(ImapProcessor.class), mailboxManagerStub, statusResponseFactory);
@@ -124,7 +126,7 @@ public class ListRightsProcessorTest {
     public void testNoListRight() throws Exception {
 
         Expectations expectations = prepareRightsExpectations();
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(false));
 
         expectations.allowing(mailboxManagerStub).getMailbox(expectations.with(Expectations.any(MailboxPath.class)), expectations.with(Expectations.any(MailboxSession.class)));
@@ -147,10 +149,10 @@ public class ListRightsProcessorTest {
     public void testNoAdminRight() throws Exception {
 
         Expectations expectations = prepareRightsExpectations();
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(true));
 
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(false));
 
         expectations.allowing(mailboxManagerStub).getMailbox(expectations.with(Expectations.any(MailboxPath.class)), expectations.with(Expectations.any(MailboxSession.class)));
@@ -198,13 +200,13 @@ public class ListRightsProcessorTest {
         expectations.allowing(mailboxManagerStub).getMailbox(expectations.with(Expectations.any(MailboxPath.class)), expectations.with(Expectations.any(MailboxSession.class)));
         expectations.will(Expectations.returnValue(messageManagerStub));
         
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(true));
         
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(true));
         
-        expectations.allowing(messageManagerStub).listRigths(expectations.with(Expectations.equal(user1Key)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).listRigths(expectations.with(path), expectations.with(Expectations.equal(user1Key)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(listRights));
 
         expectations.allowing(metaDataStub).getACL();

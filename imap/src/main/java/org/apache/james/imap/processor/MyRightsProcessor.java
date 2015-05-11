@@ -33,10 +33,10 @@ import org.apache.james.imap.message.request.MyRightsRequest;
 import org.apache.james.imap.message.response.MyRightsResponse;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
+import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.model.SimpleMailboxACL.Rfc4314Rights;
 import org.slf4j.Logger;
 
@@ -61,8 +61,10 @@ public class MyRightsProcessor extends AbstractMailboxProcessor<MyRightsRequest>
         final String mailboxName = message.getMailboxName();
         try {
 
-            MessageManager messageManager = mailboxManager.getMailbox(buildFullPath(session, mailboxName), mailboxSession);
-            MailboxACLRights myRights = messageManager.myRights(mailboxSession);
+            MailboxPath mailboxPath = buildFullPath(session, mailboxName);
+            // Check that mailbox exists
+            mailboxManager.getMailbox(mailboxPath, mailboxSession);
+            MailboxACLRights myRights = mailboxManager.myRights(mailboxPath, mailboxSession);
 
             /*
              * RFC 4314 section 6. An implementation MUST make sure the ACL

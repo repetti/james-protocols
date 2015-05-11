@@ -33,11 +33,11 @@ import org.apache.james.imap.message.request.ListRightsRequest;
 import org.apache.james.imap.message.response.ListRightsResponse;
 import org.apache.james.mailbox.MailboxManager;
 import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
+import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.model.SimpleMailboxACL.Rfc4314Rights;
 import org.apache.james.mailbox.model.SimpleMailboxACL.SimpleMailboxACLEntryKey;
 import org.slf4j.Logger;
@@ -64,7 +64,9 @@ public class ListRightsProcessor extends AbstractMailboxProcessor<ListRightsRequ
         final String identifier = message.getIdentifier();
         try {
 
-            MessageManager messageManager = mailboxManager.getMailbox(buildFullPath(session, mailboxName), mailboxSession);
+            MailboxPath mailboxPath = buildFullPath(session, mailboxName);
+            // Check that mailbox exists
+            mailboxManager.getMailbox(mailboxPath, mailboxSession);
 
             /*
              * RFC 4314 section 6.
@@ -76,11 +78,11 @@ public class ListRightsProcessor extends AbstractMailboxProcessor<ListRightsRequ
              * would be used if the mailbox did not exist, thus revealing no
              * existence information, much less the mailbox’s ACL.
              */
-            if (!messageManager.hasRight(Rfc4314Rights.l_Lookup_RIGHT, mailboxSession)) {
+            if (!mailboxManager.hasRight(mailboxPath, Rfc4314Rights.l_Lookup_RIGHT, mailboxSession)) {
                 no(command, tag, responder, HumanReadableText.MAILBOX_NOT_FOUND);
             }
             /* RFC 4314 section 4. */
-            else if (!messageManager.hasRight(Rfc4314Rights.a_Administer_RIGHT, mailboxSession)) {
+            else if (!mailboxManager.hasRight(mailboxPath, Rfc4314Rights.a_Administer_RIGHT, mailboxSession)) {
                 Object[] params = new Object[] {
                         Rfc4314Rights.a_Administer_RIGHT.toString(),
                         command.getName(),
@@ -103,7 +105,7 @@ public class ListRightsProcessor extends AbstractMailboxProcessor<ListRightsRequ
                 // Note that Section 6 recommends additional identifier’s verification
                 // steps.
                 
-                MailboxACLRights[] rights = messageManager.listRigths(key, mailboxSession);
+                MailboxACLRights[] rights = mailboxManager.listRigths(mailboxPath, key, mailboxSession);
                 ListRightsResponse aclResponse = new ListRightsResponse(mailboxName, identifier, rights);
                 responder.respond(aclResponse);
                 okComplete(command, tag, responder);

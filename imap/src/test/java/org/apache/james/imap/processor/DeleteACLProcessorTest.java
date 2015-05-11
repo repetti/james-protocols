@@ -75,6 +75,7 @@ public class DeleteACLProcessorTest {
     DeleteACLProcessor subject;
     User user1Stub;
     MailboxACLEntryKey user1Key;
+    MailboxPath path;
 
     private Expectations prepareRightsExpectations() throws MailboxException {
         return new Expectations() {
@@ -104,6 +105,7 @@ public class DeleteACLProcessorTest {
 
     @Before
     public void setUp() throws Exception {
+        path = new MailboxPath("#private", USER_1, MAILBOX_NAME);
         statusResponseFactory = new UnpooledStatusResponseFactory();
         mailboxManagerStub = mockery.mock(MailboxManager.class);
         subject = new DeleteACLProcessor(mockery.mock(ImapProcessor.class), mailboxManagerStub, statusResponseFactory);
@@ -122,7 +124,8 @@ public class DeleteACLProcessorTest {
     public void testNoListRight() throws Exception {
 
         Expectations expectations = prepareRightsExpectations();
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(false));
 
         expectations.allowing(mailboxManagerStub).getMailbox(expectations.with(Expectations.any(MailboxPath.class)), expectations.with(Expectations.any(MailboxSession.class)));
@@ -145,10 +148,10 @@ public class DeleteACLProcessorTest {
     public void testNoAdminRight() throws Exception {
 
         Expectations expectations = prepareRightsExpectations();
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(true));
 
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(false));
 
         expectations.allowing(mailboxManagerStub).getMailbox(expectations.with(Expectations.any(MailboxPath.class)), expectations.with(Expectations.any(MailboxSession.class)));
@@ -196,13 +199,13 @@ public class DeleteACLProcessorTest {
         expectations.allowing(mailboxManagerStub).getMailbox(expectations.with(Expectations.any(MailboxPath.class)), expectations.with(Expectations.any(MailboxSession.class)));
         expectations.will(Expectations.returnValue(messageManagerStub));
         
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.l_Lookup_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(true));
         
-        expectations.allowing(messageManagerStub).hasRight(expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
+        expectations.allowing(mailboxManagerStub).hasRight(expectations.with(path), expectations.with(Expectations.equal(Rfc4314Rights.a_Administer_RIGHT)), expectations.with(Expectations.same(mailboxSessionStub)));
         expectations.will(Expectations.returnValue(true));
         
-        expectations.allowing(messageManagerStub).setRights(expectations.with(Expectations.equal(user1Key)), expectations.with(Expectations.equal(EditMode.REPLACE)), expectations.with(Expectations.aNull(MailboxACLRights.class)));
+        expectations.allowing(mailboxManagerStub).setRights(expectations.with(path), expectations.with(new SimpleMailboxACL.SimpleMailboxACLCommand(user1Key, EditMode.REPLACE, null)), expectations.with(mailboxSessionStub));
 
         expectations.allowing(metaDataStub).getACL();
         expectations.will(Expectations.returnValue(acl));

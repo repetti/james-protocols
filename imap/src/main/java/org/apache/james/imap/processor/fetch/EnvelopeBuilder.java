@@ -39,7 +39,7 @@ import org.apache.james.mime4j.dom.address.AddressList;
 import org.apache.james.mime4j.dom.address.DomainList;
 import org.apache.james.mime4j.dom.address.Group;
 import org.apache.james.mime4j.dom.address.MailboxList;
-import org.apache.james.mime4j.field.address.LenientAddressBuilder;
+import org.apache.james.mime4j.field.address.LenientAddressParser;
 import org.slf4j.Logger;
 
 public final class EnvelopeBuilder {
@@ -131,7 +131,7 @@ public final class EnvelopeBuilder {
                 results = null;
             } else {
 
-                AddressList addressList = LenientAddressBuilder.DEFAULT.parseAddressList(value);
+                AddressList addressList = LenientAddressParser.DEFAULT.parseAddressList(value);
                 final int size = addressList.size();
                 final List<FetchResponse.Envelope.Address> addresses = new ArrayList<FetchResponse.Envelope.Address>(size);
                 for (int i = 0; i < size; i++) {

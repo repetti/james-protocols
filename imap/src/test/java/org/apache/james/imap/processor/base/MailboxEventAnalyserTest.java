@@ -35,6 +35,7 @@ import java.util.Map;
 
 import javax.mail.Flags;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.james.imap.api.ImapSessionState;
 import org.apache.james.imap.api.ImapSessionUtils;
 import org.apache.james.imap.api.process.ImapLineHandler;
@@ -46,10 +47,9 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.MessageManager;
 import org.apache.james.mailbox.exception.BadCredentialsException;
 import org.apache.james.mailbox.exception.MailboxException;
-import org.apache.james.mailbox.exception.UnsupportedRightException;
 import org.apache.james.mailbox.model.Content;
 import org.apache.james.mailbox.model.Headers;
-import org.apache.james.mailbox.model.MailboxACL.EditMode;
+import org.apache.james.mailbox.model.MailboxACL.MailboxACLCommand;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLEntryKey;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
 import org.apache.james.mailbox.model.MailboxACL.MailboxACLRights;
@@ -299,23 +299,6 @@ public class MailboxEventAnalyserTest {
                     throw new UnsupportedOperationException("Not implemented");
 
                 }
-                
-                public boolean hasRight(MailboxACLRight right, MailboxSession session) throws MailboxException {
-                    return true;
-                }
-
-                public MailboxACLRights myRights(MailboxSession session) throws MailboxException {
-                    throw new UnsupportedOperationException("Not implemented");
-                }
-
-                public MailboxACLRights[] listRigths(MailboxACLEntryKey identifier, MailboxSession session) throws UnsupportedRightException {
-                    throw new UnsupportedOperationException("Not implemented");
-                }
-
-                public void setRights(MailboxACLEntryKey mailboxACLEntryKey, EditMode editMode, MailboxACLRights mailboxAclRights) throws UnsupportedRightException {
-                    throw new UnsupportedOperationException("Not implemented");
-                }
-
             };
         }
         
@@ -350,7 +333,26 @@ public class MailboxEventAnalyserTest {
             throw new UnsupportedOperationException("Not implemented");
 
         }
+
+        public boolean hasRight(MailboxPath mailboxPath, MailboxACLRight mailboxACLRight, MailboxSession mailboxSession) throws MailboxException {
+            throw new NotImplementedException("Not implemented");
+        }
+
+        public MailboxACLRights myRights(MailboxPath mailboxPath, MailboxSession mailboxSession) throws MailboxException {
+            throw new NotImplementedException("Not implemented");
+        }
+
+        public MailboxACLRights[] listRigths(MailboxPath mailboxPath, MailboxACLEntryKey mailboxACLEntryKey, MailboxSession mailboxSession) throws MailboxException {
+            throw new NotImplementedException("Not implemented");
+        }
+
+        public void setRights(MailboxPath mailboxPath,
+                MailboxACLCommand mailboxACLCommand, MailboxSession session)
+                throws MailboxException {
+            throw new NotImplementedException("Not implemented");
+        }
     };
+    
     private final class MyMailboxSession implements MailboxSession {
         private long sessionId;
 
