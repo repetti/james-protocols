@@ -1,0 +1,31 @@
+apply plugin: 'java'
+
+groupId = 'org.apache.james'
+sourceCompatibility = 1.5
+version = '1.6.0-RC2-SNAPSHOT'
+
+repositories {
+    jcenter()
+}
+
+apply from: 'versions.gradle'
+
+dependencies {
+//    compile fileTree (dir: 'lib', include: '*.jar')
+
+//    compile group: 'org.apache.james.protocol', name: 'protocols-pop3', version: project.versionJamesProtocols
+//    compile group: 'org.jetbrains', name: 'annotations', version: project.versionAnnotations
+
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.5' //project.versionCommonsCodec
+    compile group: 'org.jboss.netty', name: 'netty', version: '3.2.7.Final' //project.versionCommonsCodec
+
+    compile group: 'org.slf4j', name: 'slf4j-api', version: project.versionSlf4j
+
+    testRuntime group: 'org.slf4j', name: 'slf4j-simple', version: project.versionSlf4j
+
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'commons-net', name: 'commons-net', version: '3.0.1'
+
+}
+

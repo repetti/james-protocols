@@ -1,0 +1,10 @@
+rootProject.name = 'james-protocols'
+
+include 'api'
+include 'imap'
+include 'imtp'
+include 'netty'
+include 'pop3'
+include 'smtp'
+
+
